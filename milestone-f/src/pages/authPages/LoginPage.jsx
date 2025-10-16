@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form"
 import { loginUser } from "../../services/userService"
-import {Link} from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 import {useState} from 'react';
 import ModalPop from '../../components/ModalPop';
 
@@ -17,6 +17,7 @@ export default function LoginPage() {
     const [apiError, setApiError] = useState(null);
     const [loading, setLoading] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const navigate = useNavigate();
 
     const onSubmit = async(data)=> {
         setApiError(null);
@@ -25,8 +26,22 @@ export default function LoginPage() {
         try{
             const res = await loginUser(data);
             console.log("Login Success:", res);
+
+            // Store token and user data in localStorage
+            if (res.token) {
+                localStorage.setItem('token', res.token);
+            }
+            if (res.user) {
+                localStorage.setItem('user', JSON.stringify(res.user));
+            }
             
             setShowSuccessModal(true);
+            
+            // Redirect to dashboard after 1 second
+            setTimeout(() => {
+                navigate('/dashboard');
+            }, 1000);
+            
             // reset form
             reset();
 

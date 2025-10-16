@@ -1,6 +1,6 @@
 import {registerUser} from '../../services/userService';
 import {useForm} from 'react-hook-form';
-import {Link} from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 import {useState} from 'react';
 import ModalPop from '../../components/ModalPop';
 
@@ -17,6 +17,7 @@ export default function Register() {
   const [apiError, setApiError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const navigate = useNavigate();
 
   // data submit
   const onSubmit = async(data)=> {
@@ -26,7 +27,22 @@ export default function Register() {
     try{
       const res = await registerUser(data);
       console.log("Registration Success:", res);
+      
+      // Store token and user data in localStorage
+      if (res.token) {
+        localStorage.setItem('token', res.token);
+      }
+      if (res.user) {
+        localStorage.setItem('user', JSON.stringify(res.user));
+      }
+      
       setShowSuccessModal(true);
+      
+      // Redirect to dashboard after 1 second
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 1000);
+      
       reset(); 
     }catch(err){
       console.log("Registration Error:", err);
