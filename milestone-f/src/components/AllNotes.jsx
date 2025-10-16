@@ -2,38 +2,71 @@ import { useState } from 'react';
 
 export default function AllNotes() {
     // Sample notes data (replace with API call later)
+    // Define 3 different color schemes
+    const colorSchemes = [
+        { header: 'bg-[#DECCFF]', border: 'border-blue-200' },
+        { header: 'bg-[#FFDBCC]', border: 'border-purple-200' },
+        { header: 'bg-[#F4F8D2]', border: 'border-pink-200' }
+    ];
+
     const [notes, setNotes] = useState([
         {
             id: 1,
             title: 'Daily Task',
-            content: 'Complete the project documentation and review code',
+            content: 'Complete the project documentation and review code. Make sure all tests pass and update the README file with new features.',
             category: 'Work',
-            date: '2024-01-20'
+            date: '2024-01-20',
+            colorScheme: colorSchemes[0]
         },
         {
             id: 2,
             title: 'Meeting Notes',
-            content: 'Discuss new features with the team',
+            content: 'Discuss new features with the team. Review the sprint progress and plan for next week deliverables.',
             category: 'Work',
-            date: '2024-01-21'
+            date: '2024-01-21',
+            colorScheme: colorSchemes[1]
         },
         {
             id: 3,
             title: 'Shopping List',
-            content: 'Buy groceries and household items',
+            content: 'Buy groceries and household items. Don\'t forget milk, bread, eggs, and cleaning supplies.',
             category: 'Personal',
-            date: '2024-01-22'
+            date: '2024-01-22',
+            colorScheme: colorSchemes[2]
         },
         {
             id: 4,
-            title: 'Shopping List',
-            content: 'Buy groceries and household items',
-            category: 'Personal',
-            date: '2024-01-22'
+            title: 'Project Ideas',
+            content: 'Research new project ideas for next quarter. Focus on AI and machine learning applications.',
+            category: 'Work',
+            date: '2024-01-23',
+            colorScheme: colorSchemes[0]
+        },
+        {
+            id: 5,
+            title: 'Team Meeting',
+            content: 'Discuss quarterly goals and assign tasks to team members. Review last sprint performance.',
+            category: 'Meetings',
+            date: '2024-01-24',
+            colorScheme: colorSchemes[1]
+        },
+        {
+            id: 6,
+            title: 'Client Call Notes',
+            content: 'Important points from client meeting: Budget approval, timeline extension, new requirements added.',
+            category: 'Meetings',
+            date: '2024-01-25',
+            colorScheme: colorSchemes[2]
         }
     ]);
 
     const [editingNote, setEditingNote] = useState(null);
+    const [selectedCategory, setSelectedCategory] = useState('All');
+
+    // Filter notes based on selected category
+    const filteredNotes = selectedCategory === 'All' 
+        ? notes 
+        : notes.filter(note => note.category === selectedCategory);
 
     // Handle Edit
     const handleEdit = (note) => {
@@ -60,46 +93,77 @@ export default function AllNotes() {
     };
 
     return (
-        <div className="p-4 sm:p-6 lg:p-8">
+        <div className="px-12 py-6">
+            <div className="max-w-7xl mx-auto">
             <div className="mb-6">
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">All Notes</h1>
-                <p className="text-gray-600 mt-1">Manage your notes</p>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                    <div>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">All Notes</h1>
+                        <p className="text-gray-600 mt-1">Manage your notes</p>
+                    </div>
+
+                    {/* Category Dropdown Filter */}
+                    <div className="relative">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Filter by Category
+                        </label>
+                        <select
+                            value={selectedCategory}
+                            onChange={(e) => setSelectedCategory(e.target.value)}
+                            className="block w-full sm:w-48 px-4 py-2.5 pr-10 text-sm font-medium text-gray-700 bg-white border-2 border-gray-300 rounded-lg shadow-sm hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200 cursor-pointer"
+                        >
+                            <option value="All">All Categories</option>
+                            <option value="Work">Work</option>
+                            <option value="Personal">Personal</option>
+                            <option value="Meetings">Meetings</option>
+                            <option value="Important">Important</option>
+                        </select>
+                        {/* Dropdown Icon */}
+                        <div className="absolute right-3 top-10 pointer-events-none">
+                            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {/* Notes Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 justify-center mx-auto max-w-6xl">
-                {notes.map((note) => (
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                {filteredNotes.map((note, index) => (
                     <div 
-                        key={note.id} 
-                        className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden"
+                        key={note.id}
                     >
-                        {/* Note Header with Category Badge */}
-                        <div className="bg-gradient-to-r from-primary to-blue-500 p-4">
+                        {/* Inner Note Card */}
+                        <div className="bg-white rounded-[25px] overflow-hidden min-h-[280px] flex flex-col h-full">
+                            {/* Note Header with Category Badge */}
+                            <div className={`${note.colorScheme?.header || colorSchemes[index % 3].header} p-5`}>
                             <div className="flex justify-between items-start">
-                                <span className="text-xs font-semibold text-white bg-white bg-opacity-20 px-2 py-1 rounded">
+                                <span className="text-xs font-semibold text-black bg-white bg-opacity-20 px-2 py-1 rounded">
                                     {note.category}
                                 </span>
-                                <span className="text-xs text-white opacity-80">
+                                <span className="text-xs font-bold text-black opacity-80">
                                     {note.date}
                                 </span>
                             </div>
                         </div>
 
                         {/* Note Content */}
-                        <div className="p-4">
-                            <h2 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-1">
+                        <div className="p-5 flex-grow flex flex-col">
+                            <h2 className="text-lg font-semibold text-gray-900 mb-3 line-clamp-2">
                                 {note.title}
                             </h2>
-                            <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                            <p className="text-gray-600 text-sm mb-4 flex-grow leading-relaxed">
                                 {note.content}
                             </p>
 
                             {/* Action Buttons */}
-                            <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-100">
+                            <div className="flex items-center justify-end pt-4 mt-auto border-t border-gray-100">
                                 {/* Edit Button */}
                                 <button
                                     onClick={() => handleEdit(note)}
-                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-200 group"
+                                    className="p-1 text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-200 group"
                                     title="Edit"
                                 >
                                     <svg 
@@ -137,40 +201,16 @@ export default function AllNotes() {
                                         />
                                     </svg>
                                 </button>
-
-                                {/* View/Open Button */}
-                                <button
-                                    className="p-2 text-green-600 hover:bg-green-50 rounded-md transition-colors duration-200 group"
-                                    title="View"
-                                >
-                                    <svg 
-                                        className="w-5 h-5" 
-                                        fill="none" 
-                                        stroke="currentColor" 
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path 
-                                            strokeLinecap="round" 
-                                            strokeLinejoin="round" 
-                                            strokeWidth={2} 
-                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" 
-                                        />
-                                        <path 
-                                            strokeLinecap="round" 
-                                            strokeLinejoin="round" 
-                                            strokeWidth={2} 
-                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" 
-                                        />
-                                    </svg>
-                                </button>
                             </div>
                         </div>
-                </div>
+                    </div>
+                    </div>
                 ))}
             </div>
+           
 
             {/* Empty State */}
-            {notes.length === 0 && (
+            {filteredNotes.length === 0 && (
                 <div className="text-center py-12">
                     <svg 
                         className="w-16 h-16 text-gray-400 mx-auto mb-4" 
@@ -185,10 +225,15 @@ export default function AllNotes() {
                             d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" 
                         />
                     </svg>
-                    <p className="text-gray-500 text-lg">No notes yet</p>
-                    <p className="text-gray-400 text-sm">Create your first note to get started</p>
+                    <p className="text-gray-500 text-lg">
+                        {selectedCategory === 'All' ? 'No notes yet' : `No ${selectedCategory} notes found`}
+                    </p>
+                    <p className="text-gray-400 text-sm">
+                        {selectedCategory === 'All' ? 'Create your first note to get started' : 'Try selecting a different category'}
+                    </p>
                 </div>
             )}
+            </div>
         </div>
     )
 }

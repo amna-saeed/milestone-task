@@ -4,8 +4,8 @@ import jwt from 'jsonwebtoken';
 
 export const register = async(req, res)=> {
     try{
-        const {fullName, email, password, confirmPassword} = req.body;
-        console.log("Register data:", { fullName, email });
+        const {name, email, password, confirmPassword} = req.body;
+        console.log("Register data:", { name, email });
 
         // check password validation
         if(password !== confirmPassword){
@@ -27,13 +27,13 @@ export const register = async(req, res)=> {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // create user
-        const user = await userModel.create({ userId, fullName, email, password: hashedPassword });
+        const user = await userModel.create({ userId, name, email, password: hashedPassword });
         console.log("User created:", { userId: user.userId, email: user.email });
         
         return res.status(201).json({ message: 'User created successfully', user: {
             id: user.id,
             userId: user.userId,
-            fullName: user.fullName,
+            name: user.name,
             email: user.email
         }});
 

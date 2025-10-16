@@ -2,6 +2,7 @@ import app from './app.js';
 import dotenv from 'dotenv';
 import {sequelize} from './config/dbConnection.js';
 import './models/UserModel.js';
+import './models/NotesModel.js';
 
 dotenv.config();
 
@@ -9,8 +10,8 @@ sequelize.authenticate()
 .then(async()=> {
     console.log('Database connected successfully');
     
-    // Sync database (alter: true will update table structure without losing data)
-    await sequelize.sync({ alter: true });
+    
+    await sequelize.sync({ force: false });
     console.log('Database tables synced successfully');
     
     app.listen(process.env.PORT, () => {

@@ -33,7 +33,7 @@ export default function Header() {
     };
 
     return (
-        <header className="bg-white shadow-sm sticky top-0 z-40">
+        <header className="bg-light shadow-sm sticky top-0 z-40">
             <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center">
                     {/* Left - Logo/Brand */}
@@ -41,14 +41,14 @@ export default function Header() {
                         {/* User Profile */}
                         <div className="flex items-center gap-2 sm:gap-3">
                             {/* Profile Icon */}
-                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary text-white flex items-center justify-center font-semibold text-lg">
-                                {getInitials(user?.fullName || user?.name)}
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary text-white flex items-center justify-center font-bold text-2xl">
+                                {getInitials(user?.name)}
                             </div>
                             
                             {/* User Name */}
                             <div className="hidden sm:block">
-                                <p className="text-sm font-medium text-gray-900">
-                                    {user?.fullName || user?.name || 'User'}
+                                <p className="font-bold text-xl text-gray-900">
+                                    {user?.name || 'User'}
                                 </p>
                                 <p className="text-xs text-gray-500">
                                     {user?.email || ''}

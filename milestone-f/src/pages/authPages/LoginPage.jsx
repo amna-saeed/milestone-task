@@ -105,10 +105,8 @@ export default function LoginPage() {
             />
             
             <div className="bg-light min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-                <div className="w-full max-w-md p-6 sm:p-8 bg-white rounded-lg shadow-sm">
-                <h2 className="text-xl sm:text-2xl font-bold text-center mb-4 sm:mb-6">
-                    Login
-                </h2>
+                <div className="w-full max-w-md p-6 sm:p-8 bg-white rounded-lg shadow-md">
+                    <h2 className="heading-lg sm:text-2xl font-semibold text-center mb-4 sm:mb-6">Login</h2>
 
                 {/* Display API Errors */}
                 {apiError && (
@@ -127,9 +125,12 @@ export default function LoginPage() {
                     type="email"
                     placeholder="Email"
                     {...register('email', {required: "Email is required"})}
-                    className="w-full p-2 sm:p-3 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#cfcfcf] text-sm sm:text-base"
-                    />
-                    {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
+                    className={`w-full p-2 sm:p-3 border rounded-md focus:outline-none focus:ring-1 text-sm sm:text-base ${
+                        errors.name 
+                        ? 'border-red-500 focus:ring-red-500' 
+                        : 'border-gray-300 focus:ring-[#cfcfcf]'
+                    }`} />
+                    {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
                 </div>
 
                 <div className="mb-4">
@@ -137,8 +138,11 @@ export default function LoginPage() {
                     type="password"
                     placeholder="Password"
                     {...register('password', {required: "Password is required"})}
-                    className="w-full p-2 sm:p-3 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#cfcfcf] text-sm sm:text-base"
-                    />
+                    className={`w-full p-2 sm:p-3 border rounded-md focus:outline-none focus:ring-1 text-sm sm:text-base ${
+                        errors.name 
+                        ? 'border-red-500 focus:ring-red-500' 
+                        : 'border-gray-300 focus:ring-[#cfcfcf]'
+                    }`} />
                     {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
                 </div>
 

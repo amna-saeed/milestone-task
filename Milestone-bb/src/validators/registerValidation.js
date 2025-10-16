@@ -2,7 +2,7 @@ import { body } from 'express-validator';
 
 export const registerValidation=[
         
-    body('fullName')
+    body('name')
         .trim()
         .customSanitizer(value => value.replace(/\s+/g, ''))
         .notEmpty()
@@ -23,10 +23,10 @@ export const registerValidation=[
         .trim()
         .notEmpty()
         .withMessage('Password is required')
-        .isLength({ min: 8, max:25 })
+        .isLength({ min: 5, max:25 })
         .withMessage('Password must be at least 8 characters long')
-        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/)
-        .withMessage('Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'),
+        .matches(/^(?=.*[@$!%*?&])[a-zA-Z\d@$!%*?&]+$/)
+        .withMessage('Password must contain at least one special character'),
     
     body('confirmPassword')
         .trim()
