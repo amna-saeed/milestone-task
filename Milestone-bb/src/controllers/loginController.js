@@ -21,8 +21,8 @@ export const login = async(req, res)=> {
             return res.status(400).json({ message: 'Your email is registered but password does not match. Please try again'});
         }
 
-        // generate token
-        const token = jwt.sign({userId: user.userId}, process.env.JWT_SECRET);
+        // generate token with email instead of userId for easier tracking
+        const token = jwt.sign({email: user.email}, process.env.JWT_SECRET);
         return res.status(200).json({ message: 'Login successful', token });
     }catch (error) {
         console.error('Error in login controller:', error);

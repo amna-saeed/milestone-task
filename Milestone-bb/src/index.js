@@ -10,9 +10,10 @@ sequelize.authenticate()
 .then(async()=> {
     console.log('Database connected successfully');
     
-    
-    await sequelize.sync({ force: false });
-    console.log('Database tables synced successfully');
+    // TEMPORARILY using force: true to recreate tables with new schema
+    // Change to { force: false } after first successful run
+    await sequelize.sync({ force: true });
+    console.log('Database tables recreated successfully with new schema');
     
     app.listen(process.env.PORT, () => {
         console.log(`Server is running on port ${process.env.PORT}`);

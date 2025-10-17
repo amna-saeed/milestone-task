@@ -1,85 +1,123 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { getAllNotes, deleteNote } from '../services/notesService';
 
 export default function AllNotes() {
-    // Sample notes data (replace with API call later)
-    // Define 3 different color schemes
+    const navigate = useNavigate();
+    
+    // Define 4 different color schemes
     const colorSchemes = [
-        { header: 'bg-[#DECCFF]', border: 'border-blue-200' },
-        { header: 'bg-[#FFDBCC]', border: 'border-purple-200' },
-        { header: 'bg-[#F4F8D2]', border: 'border-pink-200' }
+        { header: 'bg-[#bcd7e0]' },
+        { header: 'bg-[#baaec6]' },
+        { header: 'bg-[#e8c9ad]' },
+        { header: 'bg-[#b9d8c7]'}
     ];
 
-    const [notes, setNotes] = useState([
-        {
-            id: 1,
-            title: 'Daily Task',
-            content: 'Complete the project documentation and review code. Make sure all tests pass and update the README file with new features.',
-            category: 'Work',
-            date: '2024-01-20',
-            colorScheme: colorSchemes[0]
-        },
-        {
-            id: 2,
-            title: 'Meeting Notes',
-            content: 'Discuss new features with the team. Review the sprint progress and plan for next week deliverables.',
-            category: 'Work',
-            date: '2024-01-21',
-            colorScheme: colorSchemes[1]
-        },
-        {
-            id: 3,
-            title: 'Shopping List',
-            content: 'Buy groceries and household items. Don\'t forget milk, bread, eggs, and cleaning supplies.',
-            category: 'Personal',
-            date: '2024-01-22',
-            colorScheme: colorSchemes[2]
-        },
-        {
-            id: 4,
-            title: 'Project Ideas',
-            content: 'Research new project ideas for next quarter. Focus on AI and machine learning applications.',
-            category: 'Work',
-            date: '2024-01-23',
-            colorScheme: colorSchemes[0]
-        },
-        {
-            id: 5,
-            title: 'Team Meeting',
-            content: 'Discuss quarterly goals and assign tasks to team members. Review last sprint performance.',
-            category: 'Meetings',
-            date: '2024-01-24',
-            colorScheme: colorSchemes[1]
-        },
-        {
-            id: 6,
-            title: 'Client Call Notes',
-            content: 'Important points from client meeting: Budget approval, timeline extension, new requirements added.',
-            category: 'Meetings',
-            date: '2024-01-25',
-            colorScheme: colorSchemes[2]
-        }
-    ]);
-
-    const [editingNote, setEditingNote] = useState(null);
+    const [notes, setNotes] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState('All');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    // Filter notes based on selected category
-    const filteredNotes = selectedCategory === 'All' 
-        ? notes 
-        : notes.filter(note => note.category === selectedCategory);
+    const fetchNotes = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            console.log('Fetching notes from API...');
+            const response = await getAllNotes();
+            console.log('API Response:', response);
+            
+            // Add color scheme to each note based on index
+            const notesWithColors = response.notes.map((note, index) => ({
+                ...note,
+                colorScheme: colorSchemes[index % 4]
+            }));
+            
+            console.log('Notes with colors:', notesWithColors);
+            setNotes(notesWithColors);
+        } catch (err) {
+            console.error('Failed to fetch notes:', err);
+            setError(err.message || 'Failed to load notes');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Fetch notes from API on component mount ONLY ONCE
+    useEffect(() => {
+        fetchNotes();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // Empty dependency array - runs only once
+
+    // Helper function to capitalize category names for display
+    const capitalizeCategory = (category) => {
+        if (!category) return '';
+        return category.charAt(0).toUpperCase() + category.slice(1);
+    };
+
+    // Helper function to format time
+    const formatTime = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: true 
+        });
+    };
+
+    // Helper function to format date
+    const formatDate = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', { 
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+    };
+
+    // Helper function to truncate content to 90 characters (3 lines of ~30 chars each)
+    const truncateContent = (content, maxLength = 90) => {
+        if (!content) return '';
+        if (content.length <= maxLength) return content;
+        return content.substring(0, maxLength) + '...';
+    };
+
+    // Filter notes based on selected category and search query
+    const filteredNotes = notes.filter(note => {
+        // Category filter - if "All" is selected, show all categories
+        const matchesCategory = selectedCategory === 'All' || note.category === selectedCategory;
+        
+        // Search filter (search in title, content, AND category)
+        const searchLower = searchQuery.toLowerCase().trim();
+        const matchesSearch = searchQuery.trim() === '' || 
+            (note.title && note.title.toLowerCase().includes(searchLower)) ||
+            (note.content && note.content.toLowerCase().includes(searchLower)) ||
+            (note.category && note.category.toLowerCase().includes(searchLower));
+        
+        // Both conditions must be true
+        return matchesCategory && matchesSearch;
+    });
 
     // Handle Edit
     const handleEdit = (note) => {
-        setEditingNote(note);
-        // You can open a modal or navigate to edit page here
-        console.log('Edit note:', note);
+        console.log('Navigating to edit note:', note.id);
+        navigate(`/notes/edit/${note.id}`);
     };
 
     // Handle Delete
-    const handleDelete = (id) => {
+    const handleDelete = async (id) => {
         if (window.confirm('Are you sure you want to delete this note?')) {
-            setNotes(notes.filter(note => note.id !== id));
-            console.log('Deleted note with id:', id);
+            try {
+                await deleteNote(id);
+                // Remove note from state after successful deletion
+                setNotes(notes.filter(note => note.id !== id));
+                console.log('Deleted note with id:', id);
+            } catch (err) {
+                console.error('Failed to delete note:', err);
+                alert(err.message || 'Failed to delete note');
+            }
         }
     };
 
@@ -95,67 +133,120 @@ export default function AllNotes() {
     return (
         <div className="px-12 py-6">
             <div className="max-w-7xl mx-auto">
-            <div className="mb-6">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-                    <div>
-                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">All Notes</h1>
-                        <p className="text-gray-600 mt-1">Manage your notes</p>
-                    </div>
+            {/* Top section with buttons and search - 20px margin bottom */}
+            <div style={{ marginBottom: '20px' }}>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    {/* Left side - Create Note Button */}
+                    <button
+                        onClick={() => navigate('/notes/create')}
+                        className="flex items-center justify-center gap-2 bg-[#283152] text-white px-3 py-2.5 rounded-lg 
+                        hover:bg-[#283152e3] transition-colors font-medium shadow-sm"
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                        <span>Create Note</span>
+                    </button>
 
-                    {/* Category Dropdown Filter */}
-                    <div className="relative">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Filter by Category
-                        </label>
+                    {/* Right side - Search and Category in one line */}
+                    <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                        {/* Search Box */}
+                        <div className="relative">
+                            <input
+                                type="text"
+                                placeholder="Enter Search Task, Category..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full sm:w-64 pl-10 pr-4 py-3 border border-[#283152] rounded-lg bg-[#283152]
+                                focus:outline-none focus:ring-1 focus:ring-[#283152] focus:border-[#283152] 
+                                transition-colors duration-200 text-sm text-light"
+                            />
+                            <svg
+                                className="absolute left-3 top-3 w-5 h-5 text-light"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                />
+                            </svg>
+                        </div>
+
+                        {/* Category Dropdown Filter */}
                         <select
                             value={selectedCategory}
                             onChange={(e) => setSelectedCategory(e.target.value)}
-                            className="block w-full sm:w-48 px-4 py-2.5 pr-10 text-sm font-medium text-gray-700 bg-white border-2 border-gray-300 rounded-lg shadow-sm hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200 cursor-pointer"
+                            className="w-full sm:w-48 px-4 py-2.5 text-sm font-medium text-[#283152] bg-white 
+                            border-2 border-[#283152] rounded-lg shadow-sm hover:border-[#283152] focus:outline-none 
+                            focus:ring-1 transition-colors duration-200 cursor-pointer"
                         >
                             <option value="All">All Categories</option>
-                            <option value="Work">Work</option>
-                            <option value="Personal">Personal</option>
-                            <option value="Meetings">Meetings</option>
-                            <option value="Important">Important</option>
+                            <option value="work">Work</option>
+                            <option value="personal">Personal</option>
+                            <option value="meetings">Meetings</option>
                         </select>
-                        {/* Dropdown Icon */}
-                        <div className="absolute right-3 top-10 pointer-events-none">
-                            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </div>
                     </div>
                 </div>
             </div>
 
+            {/* Loading State */}
+            {loading && (
+                <div className="text-center py-12">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+                    <p className="text-gray-500 mt-4">Loading notes...</p>
+                </div>
+            )}
+
+            {/* Error State */}
+            {error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                    <p className="text-red-600">{error}</p>
+                    <button 
+                        onClick={fetchNotes}
+                        className="mt-2 text-sm text-red-600 hover:text-red-800 underline"
+                    >
+                        Try again
+                    </button>
+                </div>
+            )}
+
             {/* Notes Grid */}
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+            {!loading && !error && (
+            <div style={{ paddingTop: '20px' }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                 {filteredNotes.map((note, index) => (
                     <div 
                         key={note.id}
                     >
                         {/* Inner Note Card */}
                         <div className="bg-white rounded-[25px] overflow-hidden min-h-[280px] flex flex-col h-full">
-                            {/* Note Header with Category Badge */}
-                            <div className={`${note.colorScheme?.header || colorSchemes[index % 3].header} p-5`}>
+                            {/* Note Header with Category Badge, Time and Date */}
+                            <div className={`${note.colorScheme?.header || colorSchemes[index % 4].header} p-5`}>
                             <div className="flex justify-between items-start">
-                                <span className="text-xs font-semibold text-black bg-white bg-opacity-20 px-2 py-1 rounded">
-                                    {note.category}
+                                <span className="text-xs font-semibold text-black bg-white bg-opacity-20 px-3 py-2 rounded">
+                                    {capitalizeCategory(note.category)}
                                 </span>
-                                <span className="text-xs font-bold text-black opacity-80">
-                                    {note.date}
-                                </span>
+                                <div className="flex flex-col items-end gap-1">
+                                    <span className="text-xs font-bold text-black opacity-80">
+                                        {formatTime(note.createdAt)}
+                                    </span>
+                                    <span className="text-xs font-medium text-black opacity-70">
+                                        {formatDate(note.createdAt)}
+                                    </span>
+                                </div>
                             </div>
                         </div>
 
                         {/* Note Content */}
-                        <div className="p-5 flex-grow flex flex-col">
-                            <h2 className="text-lg font-semibold text-gray-900 mb-3 line-clamp-2">
+                        <div className="p-5 flex-grow flex flex-col overflow-hidden">
+                            <h2 className="text-lg font-semibold text-gray-900 mb-3 line-clamp-2 break-words overflow-wrap-anywhere">
                                 {note.title}
                             </h2>
-                            <p className="text-gray-600 text-sm mb-4 flex-grow leading-relaxed">
-                                {note.content}
+                            <p className="text-gray-600 text-sm mb-4 flex-grow leading-relaxed break-words overflow-wrap-anywhere">
+                                {truncateContent(note.content, 90)}
                             </p>
 
                             {/* Action Buttons */}
@@ -206,11 +297,9 @@ export default function AllNotes() {
                     </div>
                     </div>
                 ))}
-            </div>
-           
 
-            {/* Empty State */}
-            {filteredNotes.length === 0 && (
+                {/* Empty State */}
+                {filteredNotes.length === 0 && (
                 <div className="text-center py-12">
                     <svg 
                         className="w-16 h-16 text-gray-400 mx-auto mb-4" 
@@ -226,12 +315,24 @@ export default function AllNotes() {
                         />
                     </svg>
                     <p className="text-gray-500 text-lg">
-                        {selectedCategory === 'All' ? 'No notes yet' : `No ${selectedCategory} notes found`}
+                        {searchQuery 
+                            ? `No notes found for "${searchQuery}"` 
+                            : selectedCategory === 'All' 
+                            ? 'No notes yet' 
+                            : `No ${capitalizeCategory(selectedCategory)} notes found`
+                        }
                     </p>
                     <p className="text-gray-400 text-sm">
-                        {selectedCategory === 'All' ? 'Create your first note to get started' : 'Try selecting a different category'}
+                        {searchQuery 
+                            ? 'Try a different search term' 
+                            : selectedCategory === 'All' 
+                            ? 'Create your first note to get started' 
+                            : 'Try selecting a different category'
+                        }
                     </p>
                 </div>
+                )}
+            </div>
             )}
             </div>
         </div>

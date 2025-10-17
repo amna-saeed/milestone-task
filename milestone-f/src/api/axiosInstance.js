@@ -13,8 +13,12 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
+        console.log('Token from localStorage:', token ? 'Token exists' : 'No token found');
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
+            console.log('Authorization header set:', config.headers.Authorization.substring(0, 20) + '...');
+        } else {
+            console.warn('No token found in localStorage. User may not be logged in.');
         }
         return config;
     },

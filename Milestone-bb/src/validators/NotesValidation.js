@@ -12,8 +12,8 @@ export const notesValidation = [
     .trim()
     .notEmpty()
     .withMessage("Content is required")
-    .isLength({min: 1, max: 100})
-    .withMessage("Content must be between 10 and 100 characters"),
+    .isLength({min: 1, max: 500})
+    .withMessage("Content must be between 1 and 500 characters"),
 
     body("category")
     .optional()

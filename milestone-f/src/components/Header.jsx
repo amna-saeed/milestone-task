@@ -34,23 +34,23 @@ export default function Header() {
 
     return (
         <header className="bg-light shadow-sm sticky top-0 z-40">
-            <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+            <div className="bg-[#283152] max-w-7xl mx-auto py-4 px-6 sm:px-8 lg:px-10">
                 <div className="flex justify-between items-center">
                     {/* Left - Logo/Brand */}
                     <div className="flex items-center">
                         {/* User Profile */}
                         <div className="flex items-center gap-2 sm:gap-3">
                             {/* Profile Icon */}
-                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary text-white flex items-center justify-center font-bold text-2xl">
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-light text-[#283152] flex items-center justify-center font-bold text-2xl">
                                 {getInitials(user?.name)}
                             </div>
                             
                             {/* User Name */}
                             <div className="hidden sm:block">
-                                <p className="font-bold text-xl text-gray-900">
+                                <p className="font-semibold text-2xl text-light">
                                     {user?.name || 'User'}
                                 </p>
-                                <p className="text-xs text-gray-500">
+                                <p className="text-xs text-light">
                                     {user?.email || ''}
                                 </p>
                             </div>
@@ -62,7 +62,9 @@ export default function Header() {
                         {/* Logout Button */}
                         <button 
                             onClick={handleLogout}
-                            className="bg-red-500 hover:bg-red-600 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-md text-sm sm:text-base transition-colors duration-200 flex items-center gap-2"
+                            class="bg-light hover:bg-red-600 hover:text-white text-red-600 px-4 py-2 sm:px-4 sm:py-2 rounded-md 
+                            text-sm sm:text-base text-semibold
+                            transition-colors duration-200 flex items-center gap-1"
                         >
                             <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />

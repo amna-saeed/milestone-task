@@ -1,19 +1,21 @@
+import { useState } from 'react';
 import Header from '../components/Header';
 import AllNotes from '../components/AllNotes';
-import SearchBox from '../components/SearchBox';
 
 export default function Dashboard() {
+    // Force re-render of AllNotes when dashboard loads
+    const [refreshKey, setRefreshKey] = useState(0);
+
     return (
         <div className="min-h-screen bg-light">
             
             {/* Header */}
             <Header />
             
-            {/* Search Box */}
-            <SearchBox />
+            
 
-            {/* All Notes Component */}
-            <AllNotes />
+            {/* All Notes Component - key forces refresh */}
+            <AllNotes key={refreshKey} />
            
         </div>
     )
