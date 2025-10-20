@@ -4,6 +4,7 @@ import LoginPage from '../pages/authPages/LoginPage';
 import Dashboard from '../pages/Dashboard';
 import ProtectedRoute from '../components/ProtectedRoute';
 import AuthRoute from '../components/AuthRoute';
+import EditProfile from '../pages/authPages/EditProfile'
 
 // Notes
 import CreateNotes from '../pages/notesCard/CreateNotes';
@@ -32,6 +33,7 @@ export default function AppRouter() {
                         <Dashboard />
                     </ProtectedRoute>
                 } />
+                <Route path="/edit-profie" element={ <EditProfile /> } />
 
                 {/* Notes Routes */}
                 <Route path="/notes/create" element={

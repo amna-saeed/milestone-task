@@ -22,7 +22,7 @@ export const login = async(req, res)=> {
         }
 
         // generate token with email instead of userId for easier tracking
-        const token = jwt.sign({email: user.email}, process.env.JWT_SECRET);
+        const token = jwt.sign({email: user.email, id:user.id}, process.env.JWT_SECRET);
         return res.status(200).json({ message: 'Login successful', token });
     }catch (error) {
         console.error('Error in login controller:', error);

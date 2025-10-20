@@ -15,7 +15,7 @@ export const register = async(req, res)=> {
         // check if email already exists
         const existingEmail = await userModel.findOne({ where: { email } });
         if(existingEmail){
-            return res.status(400).json({ message: 'Yorr email is already registered, Go to logn' });
+            return res.status(400).json({ message: 'Yorr email is already registered, Go to login' });
         }
 
         // Auto-generate userId (count + 1)

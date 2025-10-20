@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Link } from "react-router-dom";
 
 export default function Header() {
     const [user, setUser] = useState(null);
@@ -26,51 +27,120 @@ export default function Header() {
         navigate('/login');
     };
 
-    // Get first letter of name for avatar
-    const getInitials = (name) => {
-        if (!name) return 'U';
-        return name.charAt(0).toUpperCase();
-    };
-
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef();
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+          if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+            setIsOpen(false);
+          }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+      }, []);
     return (
-        <header className="bg-light shadow-sm sticky top-0 z-40">
-            <div className="bg-[#283152] max-w-7xl mx-auto py-4 px-6 sm:px-8 lg:px-10">
+        <header className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-40">
+            <div className="max-w-[1920px] mx-auto py-2 px-2 sm:px-10 lg:px-10 xl:px-16 xl:py-4 2xl:px-24">
                 <div className="flex justify-between items-center">
                     {/* Left - Logo/Brand */}
                     <div className="flex items-center">
                         {/* User Profile */}
-                        <div className="flex items-center gap-2 sm:gap-3">
-                            {/* Profile Icon */}
-                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-light text-[#283152] flex items-center justify-center font-bold text-2xl">
-                                {getInitials(user?.name)}
+                        <Link to="/dashboard">
+                            <div className="flex items-center gap-1 sm:gap-1">
+                                <img src="public/assets/logo-notes.png" alt="logo" className="w-8 h-8 rounded-full hover:shadow-md transition-all duration-200" />
+                                <p className='text-md font-semibold'>Personal Notes</p>
                             </div>
-                            
-                            {/* User Name */}
-                            <div className="hidden sm:block">
-                                <p className="font-semibold text-2xl text-light">
-                                    {user?.name || 'User'}
-                                </p>
-                                <p className="text-xs text-light">
-                                    {user?.email || ''}
-                                </p>
-                            </div>
-                        </div>
+                        </Link>
                     </div>
 
-                    {/* Right - User Profile & Logout */}
-                    <div className="flex items-center gap-3 sm:gap-4">
-                        {/* Logout Button */}
-                        <button 
-                            onClick={handleLogout}
-                            class="bg-light hover:bg-red-600 hover:text-white text-red-600 px-4 py-2 sm:px-4 sm:py-2 rounded-md 
-                            text-sm sm:text-base text-semibold
-                            transition-colors duration-200 flex items-center gap-1"
+                    <div className="relative" ref={dropdownRef}>
+                        {/* Profile Icon */}
+                        <button
+                            onClick={() => setIsOpen(!isOpen)}
+                            className="flex items-center gap-3 sm:gap-4 focus:outline-none"
                         >
-                            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                            </svg>
-                            <span className="hidden sm:inline">Logout</span>
+                            <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="w-7 h-7 text-gray-700"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                            >
+                            {/* Head */}
+                            <circle cx="12" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round" />
+                            {/* Body */}
+                            <path
+                                d="M5.5 21c0-3 5-4 6.5-4s6.5 1 6.5 4"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            />
+                        </svg>
                         </button>
+
+                        {/* Dropdown */}
+                        {isOpen && (
+                            <div className="absolute right-0 mt-2 w-44 sm:w-48 bg-white shadow-lg rounded-xl border border-gray-200 py-3 px-4 z-50 animate-fadeIn">
+                        
+                            {/* User Info */}
+                            <div className="mb-3">
+                                <p className="text-sm font-semibold text-gray-800 truncate">{user?.name}</p>
+                                <p className="text-xs text-gray-500 truncate">{user?.email || ''}</p>
+                            </div>
+
+                            {/* My Notes */}
+                            <Link to="/dashboard">
+                                <button className="flex items-center gap-2 px-2 w-full text-left mb-2 text-gray-700 hover:bg-gray-100 
+                                rounded-md py-1 text-sm transition-colors duration-150">
+                                    <img path="/dashboard" src="public/assets/logo-notes.png" 
+                                    alt="logo" className="w-5 h-5 rounded-full hover:shadow-md transition-all duration-200" />
+                                My Notes
+                                </button>
+                            </Link>
+
+                        {/* Profile */}
+                        <Link to="/edit-profie">
+                            <button className="flex items-center px-2 gap-2 w-full text-left mb-2 text-gray-700 hover:bg-gray-100 
+                                rounded-md py-1 text-sm transition-colors duration-150">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="w-4 h-4 text-black"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                            >
+                                <circle cx="12" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round" />
+                                <path d="M5.5 21c0-3 5-4 6.5-4s6.5 1 6.5 4" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                                Profile
+                            </button>
+                        </Link>
+
+                        {/* Logout */}
+                        <button
+                        onClick={handleLogout}
+                        className="flex items-center gap-2 w-full text-left text-sm text-red-600 
+                        hover:bg-red-50 rounded-md px-2 py-1 transition-colors duration-150"
+                        >
+                        <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                            />
+                        </svg>
+                        Logout
+                        </button>
+                    </div>
+                    )}
+
                     </div>
                 </div>
             </div>

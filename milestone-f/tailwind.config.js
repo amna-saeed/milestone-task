@@ -7,7 +7,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: '#3B82F6',      // Main brand color
+        primary: '#184071',      // Main brand color
         secondary: '#10B981',    // Secondary color
         light: '#F2F3F4',        // Light background
         success: '#10B981',      // Success messages

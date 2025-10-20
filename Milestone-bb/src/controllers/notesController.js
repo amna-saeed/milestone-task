@@ -125,6 +125,46 @@ export const getNoteController = async (req, res) => {
     }
 };
 
+// GET SINGLE NOTE BY ID - Only user's own note
+export const getNoteByIdController = async (req, res) => {
+    try {
+        const userEmail = req.userEmail; // From authMiddleware
+        const { id } = req.params;
+        
+        console.log(`Fetching note with ID: ${id} for user: ${userEmail}`);
+        
+        // Find note that belongs to this user
+        const note = await notesModel.findOne({
+            where: { 
+                id: id,
+                userEmail: userEmail 
+            }
+        });
+        
+        if (!note) {
+            console.log(`Note with ID ${id} not found for user ${userEmail}`);
+            return res.status(404).json({
+                success: false,
+                message: "Note not found or you don't have permission to access it"
+            });
+        }
+        
+        console.log(`Note found:`, note.toJSON());
+        
+        return res.status(200).json({
+            success: true,
+            message: "Note fetched successfully",
+            data: note
+        });
+    } catch (error) {
+        console.error("Error in get note by ID controller:", error);
+        return res.status(500).json({ 
+            success: false, 
+            message: "Failed to fetch note" 
+        });
+    }
+};
+
 // UPDATE NOTE - Only user's own note
 export const updateNoteController = async (req, res) => {
     try {

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getNoteById, updateNote } from '../../services/notesService';
 import Header from '../../components/Header';
+import NotesAlert from '../../components/NotesAlert';
 
 export default function EditNotes() {
     const navigate = useNavigate();
@@ -9,6 +10,7 @@ export default function EditNotes() {
     const [loading, setLoading] = useState(false);
     const [fetchingNote, setFetchingNote] = useState(true);
     const [error, setError] = useState(null);
+    const [showSuccessAlert, setShowSuccessAlert] = useState(false);
     const [fieldErrors, setFieldErrors] = useState({
         title: false,
         content: false
@@ -25,6 +27,7 @@ export default function EditNotes() {
         const fetchNote = async () => {
             try {
                 setFetchingNote(true);
+                setError(null); // Clear any previous errors
                 console.log('Fetching note with ID:', id);
                 const response = await getNoteById(id);
                 console.log('Note fetched successfully:', response);
@@ -36,6 +39,8 @@ export default function EditNotes() {
                         content: response.data.content || '',
                         category: response.data.category || 'work'
                     });
+                    // Ensure error is cleared on successful fetch
+                    setError(null);
                 }
             } catch (err) {
                 console.error('Failed to fetch note:', err);
@@ -63,6 +68,10 @@ export default function EditNotes() {
                 ...prev,
                 [name]: false
             }));
+            // Also clear general error message when user starts editing
+            if (error) {
+                setError(null);
+            }
         }
     };
 
@@ -93,10 +102,12 @@ export default function EditNotes() {
             console.log('Note updated successfully:', response);
             
             // Show success message
-            alert('Note updated successfully!');
+            setShowSuccessAlert(true);
             
-            // Redirect to dashboard after successful update
-            navigate('/dashboard');
+            // Redirect to dashboard after showing alert
+            setTimeout(() => {
+                navigate('/dashboard');
+            }, 1500);
         } catch (err) {
             console.error('Failed to update note:', err);
             
@@ -131,40 +142,48 @@ export default function EditNotes() {
 
     return (
         <div className="min-h-screen bg-light">
-            {/* Header */}
+            {showSuccessAlert && (
+                <NotesAlert 
+                    message="Note updated successfully!" 
+                    type="success"
+                    isVisible={true}
+                    onClose={() => setShowSuccessAlert(false)}
+                />
+            )}
+            
             <Header />
 
-            <div className="px-6 sm:px-12 py-8">
-                <div className="max-w-3xl mx-auto">
+            <div className="px-4 sm:px-6 py-4 sm:py-6">
+                <div className="max-w-2xl mx-auto">
                     {/* Back Button */}
                     <button
                         onClick={() => navigate('/dashboard')}
-                        className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+                        className="flex items-center gap-1.5 text-gray-600 hover:text-gray-900 mb-4 transition-colors text-sm"
                     >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
                         <span>Back to Dashboard</span>
                     </button>
 
                     {/* Form Card */}
-                    <div className="bg-white rounded-2xl shadow-md p-6 sm:p-8">
-                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">Edit Note</h1>
+                    <div className="bg-white rounded-xl shadow-md p-4 sm:p-6">
+                        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">Edit Note</h1>
 
                         {/* Error Message */}
                         {error && (
-                            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                                <p className="text-red-600 text-sm whitespace-pre-wrap">{error}</p>
+                            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                                <p className="text-red-600 text-xs sm:text-sm whitespace-pre-wrap">{error}</p>
                             </div>
                         )}
 
-                        <form onSubmit={handleSubmit} className="space-y-6">
+                        <form onSubmit={handleSubmit} className="space-y-4">
                             {/* Title */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
                                     Title <span className="text-red-500">*</span>
-                                    <span className="text-gray-500 text-xs ml-2">
-                                        ({formData.title.length}/50 characters)
+                                    <span className="text-gray-500 text-xs ml-1">
+                                        ({formData.title.length}/50)
                                     </span>
                                 </label>
                                 <input
@@ -173,21 +192,21 @@ export default function EditNotes() {
                                     value={formData.title}
                                     onChange={handleChange}
                                     maxLength={50}
-                                    placeholder="Enter note title (max 50 characters)"
+                                    placeholder="Enter note title"
                                     style={fieldErrors.title ? { border: '1px solid #ef4444' } : {}}
-                                    className={`w-full px-4 py-3 rounded-lg focus:outline-none transition-colors resize-none ${
+                                    className={`w-full px-3 py-2 text-sm rounded-lg focus:outline-none transition-colors resize-none ${
                                         fieldErrors.content 
                                         ? 'focus:ring-1 focus:ring-red-500 focus:border-red-300' 
                                         : 'border border-gray-300 focus:ring-1 focus:ring-gray-200 focus:border-gray-200'
                                     }`}
                                 />
                                 {fieldErrors.title && (
-                                    <p className="text-red-500 text-sm mt-1">
+                                    <p className="text-red-500 text-xs mt-1">
                                         Title is required
                                     </p>
                                 )}
                                 {formData.title.length >= 50 && !fieldErrors.title && (
-                                    <p className="text-orange-600 text-sm mt-1">
+                                    <p className="text-orange-600 text-xs mt-1">
                                         ⚠️ Maximum 50 characters reached
                                     </p>
                                 )}
@@ -195,14 +214,14 @@ export default function EditNotes() {
 
                             {/* Category */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
                                     Category
                                 </label>
                                 <select
                                     name="category"
                                     value={formData.category}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-200 focus:border-gray-200 transition-colors cursor-pointer"
+                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-200 focus:border-gray-200 transition-colors cursor-pointer"
                                 >
                                     <option value="work">Work</option>
                                     <option value="personal">Personal</option>
@@ -212,10 +231,10 @@ export default function EditNotes() {
 
                             {/* Content */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
                                     Content <span className="text-red-500">*</span>
-                                    <span className="text-gray-500 text-xs ml-2">
-                                        ({formData.content.length}/500 characters)
+                                    <span className="text-gray-500 text-xs ml-1">
+                                        ({formData.content.length}/500)
                                     </span>
                                 </label>
                                 <textarea
@@ -223,40 +242,40 @@ export default function EditNotes() {
                                     value={formData.content}
                                     onChange={handleChange}
                                     maxLength={500}
-                                    placeholder="Write your note content here (max 500 characters)..."
-                                    rows="8"
+                                    placeholder="Write your note content here..."
+                                    rows="6"
                                     style={fieldErrors.content ? { border: '1px solid #ef4444' } : {}}
-                                    className={`w-full px-4 py-3 rounded-lg focus:outline-none transition-colors resize-none ${
+                                    className={`w-full px-3 py-2 text-sm rounded-lg focus:outline-none transition-colors resize-none ${
                                         fieldErrors.content 
                                         ? 'focus:ring-1 focus:ring-red-500 focus:border-red-300' 
                                         : 'border border-gray-300 focus:ring-1 focus:ring-gray-200 focus:border-gray-200'
                                     }`}
                                 ></textarea>
                                 {fieldErrors.content && (
-                                    <p className="text-red-500 text-sm mt-1">
+                                    <p className="text-red-500 text-xs mt-1">
                                         Content is required
                                     </p>
                                 )}
                                 {formData.content.length >= 500 && !fieldErrors.content && (
-                                    <p className="text-orange-600 text-sm mt-1">
+                                    <p className="text-orange-600 text-xs mt-1">
                                         ⚠️ Maximum 500 characters reached
                                     </p>
                                 )}
                             </div>
 
                             {/* Action Buttons */}
-                            <div className="flex gap-4 pt-4">
+                            <div className="flex gap-2 sm:gap-3 pt-2">
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="flex-1 bg-primary text-white py-3 px-6 rounded-lg hover:bg-hover-primary transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="flex-1 bg-primary text-white py-2 px-4 rounded-lg hover:bg-hover-primary transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {loading ? 'Updating...' : 'Update Note'}
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => navigate('/dashboard')}
-                                    className="flex-1 bg-gray-200 text-gray-700 py-3 px-6 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                                    className="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors font-medium text-sm"
                                 >
                                     Cancel
                                 </button>

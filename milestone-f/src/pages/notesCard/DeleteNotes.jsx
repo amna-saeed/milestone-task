@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getNoteById, deleteNote } from '../../services/notesService';
 import Header from '../../components/Header';
+import NotesAlert from '../../components/NotesAlert';
 
 export default function DeleteNotes() {
     const navigate = useNavigate();
@@ -9,6 +10,7 @@ export default function DeleteNotes() {
     const [loading, setLoading] = useState(false);
     const [fetchingNote, setFetchingNote] = useState(true);
     const [error, setError] = useState(null);
+    const [showDeleteAlert, setShowDeleteAlert] = useState(false);
     const [note, setNote] = useState(null);
 
     // Fetch the note data when component mounts
@@ -36,7 +38,8 @@ export default function DeleteNotes() {
         }
     }, [id]);
 
-    const handleDelete = async () => {
+    // Delete function - no confirmation
+    const handleDeleteClick = async () => {
         setLoading(true);
         setError(null);
 
@@ -46,15 +49,17 @@ export default function DeleteNotes() {
             await deleteNote(id);
             console.log('Note deleted successfully');
             
-            // Show success message
-            alert('Note deleted successfully!');
+            // Show delete success message (red)
+            setShowDeleteAlert(true);
             
-            // Redirect to dashboard after successful deletion
-            navigate('/dashboard');
+            // Redirect to dashboard after showing alert
+            setTimeout(() => {
+                navigate('/dashboard');
+            }, 1500);
         } catch (err) {
             console.error('Failed to delete note:', err);
             
-            // Show detailed error message
+            // Show detailed error message only on error
             let errorMessage = 'Failed to delete note';
             
             if (err.status === 'NETWORK_ERROR') {
@@ -116,7 +121,15 @@ export default function DeleteNotes() {
 
     return (
         <div className="min-h-screen bg-light">
-            {/* Header */}
+            {showDeleteAlert && (
+                <NotesAlert 
+                    message="Note deleted successfully!" 
+                    type="error"
+                    isVisible={true}
+                    onClose={() => setShowDeleteAlert(false)}
+                />
+            )}
+            
             <Header />
 
             <div className="px-6 sm:px-12 py-8">
@@ -143,7 +156,7 @@ export default function DeleteNotes() {
                             </div>
                             
                             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Delete Note</h1>
-                            <p className="text-gray-600">Are you sure you want to delete this note? This action cannot be undone.</p>
+                            <p className="text-gray-600">Are you sure you want to delete this note?</p>
                         </div>
 
                         {/* Error Message */}
@@ -183,7 +196,7 @@ export default function DeleteNotes() {
                             </button>
                             <button
                                 type="button"
-                                onClick={handleDelete}
+                                onClick={handleDeleteClick}
                                 disabled={loading}
                                 className="flex-1 bg-red-600 text-white py-3 px-6 rounded-lg hover:bg-red-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                             >

@@ -41,5 +41,21 @@ export const loginUser= async(data)=>{
         errorData.statusCode = error.response.status;
         throw errorData;
     }
-    
 }
+
+// update Password
+export const updatePassword = async(data, token)=> {
+    try{
+        const response = await axiosInstance.put('/auth/update-password', data, 
+            {
+                headers:{
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
+        return response.data;
+    }catch(error){
+        console.error(error.response?.data || error.message);
+        throw error;
+    }
+};
