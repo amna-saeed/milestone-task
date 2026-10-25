@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node api.js && node src/index.js",
-    "dev": "node api.js && nodemon src/index.js"
+    "start": "node init && node src/index.js",
+    "dev": "node init && nodemon src/index.js"
   },
   "keywords": [],
   "author": "",
